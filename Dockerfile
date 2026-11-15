@@ -7,6 +7,8 @@ RUN npm install -g opencode-ai \
     && mkdir -p /root/.config/opencode \
     && echo '{"permission": {"external_directory": "allow", "bash": "allow", "shell": "allow", "webfetch": "allow", "websearch": "allow"}}' > /root/.config/opencode/opencode.json
 
+COPY AGENTS.md /root/.config/opencode/AGENTS.md
+
 WORKDIR /workspace
 
 COPY --chmod=0755 git-config.sh /usr/local/bin/git-config.sh
