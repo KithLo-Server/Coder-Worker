@@ -29,7 +29,6 @@ The Coder bot injects these variables when it creates a worker container.
 | Variable | Purpose |
 | --- | --- |
 | `DEEPSEEK_API_KEY` | DeepSeek provider API key. Included even when empty. |
-| `OPENCODE_MODEL` | The repository's selected model, or the catalog default. |
 
 ### Injected when configured
 
