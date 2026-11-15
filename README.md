@@ -43,9 +43,25 @@ The Coder bot injects these variables when it creates a worker container.
 | `GOOGLE_APPLICATION_CREDENTIALS` | Credentials JSON is set | Set to `/root/.gcp-credentials.json`. |
 | `GOOGLE_APPLICATION_CREDENTIALS_JSON` | Credentials JSON is set | Service-account JSON written to `/root/.gcp-credentials.json` at startup. |
 | `OPENCODE_SSH_KEY` | SSH key is set | SSH private key used for Git authentication and commit signing. |
-| `GIT_USER_NAME` | Git name is set | Commit identity configured at startup. |
-| `GIT_USER_EMAIL` | Git email is set | Commit identity configured at startup. |
+| `GIT_USER_NAME` | Git name is set | Commit identity configured and enforced at startup. |
+| `GIT_USER_EMAIL` | Git email is set | Commit identity configured and enforced at startup. |
 | `OPENCODE_INSTRUCTION` | Instruction is set | Legacy: previously written to `AGENTS.md` at startup. Ignored by this image because `AGENTS.md` is baked in at build time. |
+
+### Commit identity guard
+
+Native config-based hooks require Git 2.54 or newer, so the image installs Git
+2.56.1 from the `git-core` PPA.
+
+When `GIT_USER_NAME` and/or `GIT_USER_EMAIL` are set, the image installs a
+global native Git hook (`hook.verify-commit-identity`) for the `pre-commit`
+event. It rejects commits whose effective author or committer name/email does
+not match the set values. Each variable is enforced independently, so an unset
+variable is not checked. Repository-local hooks still run alongside the global
+hook, and `core.hooksPath` is not modified.
+
+The guard does not apply to `git commit --no-verify`, to `--author` overrides,
+or to commits created by commands that do not run the `pre-commit` hook (for
+example `cherry-pick`, `rebase`, and `commit-tree`).
 
 ### Added for command execution only
 

@@ -20,10 +20,13 @@ fi
 
 if [ -n "${GIT_USER_NAME:-}" ]; then
     git config --global user.name "$GIT_USER_NAME"
-    unset GIT_USER_NAME
 fi
 
 if [ -n "${GIT_USER_EMAIL:-}" ]; then
     git config --global user.email "$GIT_USER_EMAIL"
-    unset GIT_USER_EMAIL
 fi
+
+# Keep GIT_USER_NAME and GIT_USER_EMAIL in the environment: the hook uses them
+# to reject commits made with a different effective identity.
+git config --global hook.verify-commit-identity.command /usr/local/bin/git-identity-hook
+git config --global --replace-all hook.verify-commit-identity.event pre-commit
