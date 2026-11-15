@@ -22,10 +22,40 @@ manual dispatch. It runs on an arm64 runner because the base image is
 
 ## Runtime environment
 
+The Coder bot injects these variables when it creates a worker container.
+
+### Always injected
+
 | Variable | Purpose |
 | --- | --- |
-| `GOOGLE_APPLICATION_CREDENTIALS_JSON` | Service-account JSON written to `/root/.gcp-credentials.json` at startup. |
-| `OPENCODE_SSH_KEY` | SSH private key used for Git authentication and commit signing. |
-| `GIT_USER_NAME` / `GIT_USER_EMAIL` | Commit identity configured at startup. |
+| `DEEPSEEK_API_KEY` | DeepSeek provider API key. Included even when empty. |
+| `OPENCODE_MODEL` | The repository's selected model, or the catalog default. |
+
+### Injected when configured
+
+| Variable | Condition | Purpose |
+| --- | --- | --- |
+| `OPENROUTER_API_KEY` | `OPENROUTER_API_KEY` is set | OpenRouter provider authentication. |
+| `GOOGLE_VERTEX_PROJECT` | Vertex project is set | Google Vertex AI project. |
+| `GOOGLE_CLOUD_PROJECT` | Vertex project is set | Alias for the Vertex project. |
+| `GOOGLE_VERTEX_LOCATION` | Vertex project is set | Vertex location, defaulting to `global`. |
+| `GOOGLE_CLOUD_LOCATION` | Vertex project is set | Alias for the Vertex location. |
+| `VERTEX_LOCATION` | Vertex project is set | Alias for the Vertex location. |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Credentials JSON is set | Set to `/root/.gcp-credentials.json`. |
+| `GOOGLE_APPLICATION_CREDENTIALS_JSON` | Credentials JSON is set | Service-account JSON written to `/root/.gcp-credentials.json` at startup. |
+| `OPENCODE_SSH_KEY` | SSH key is set | SSH private key used for Git authentication and commit signing. |
+| `GIT_USER_NAME` | Git name is set | Commit identity configured at startup. |
+| `GIT_USER_EMAIL` | Git email is set | Commit identity configured at startup. |
+| `OPENCODE_INSTRUCTION` | Instruction is set | Legacy: previously written to `AGENTS.md` at startup. Ignored by this image because `AGENTS.md` is baked in at build time. |
+
+### Added for command execution only
+
+| Variable | Purpose |
+| --- | --- |
+| `OPENCODE_RUN_ID` | Marks the process tree so `/cancel` can terminate it. |
+| `OPENCODE_CANCEL_TOKEN` | Set on the cancel helper process as `OPENCODE_RUN_ID=<runID>`. |
+
+Bot-only variables such as `TELEGRAM_*`, `ALLOWED_USER_ID`, `OPENCODE_MODELS`,
+`HOST_REPOS_DIR`, and `DATA_DIR` are not forwarded to workers.
 
 The container starts at `/workspace`, configures Git, and then idles until used.
